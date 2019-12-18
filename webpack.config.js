@@ -1,8 +1,7 @@
 const path = require('path');
 module.exports = {
     entry: {
-        index: './index.jsx',
-        indexTest: './docs/index-test.jsx'
+        index: './docs/index.jsx'
     },
     module: {
         rules: [
@@ -18,6 +17,6 @@ module.exports = {
     output: {
         chunkFilename: '[name].js',
         filename: '[name].js',
-        path: path.resolve(__dirname, 'dist')
+        path: path.resolve(__dirname, 'docs')
     }
 };

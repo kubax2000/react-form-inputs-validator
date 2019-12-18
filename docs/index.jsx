@@ -19,6 +19,7 @@ export function ExampleComponent() {
                 <input name={'email'} onChange={handleInputChange} type={'text'} value={state.email} />
                 <Validator.IsRequired value={state.email}>IsRequired</Validator.IsRequired>
                 <Validator.IsEmail value={state.email}>IsEmail</Validator.IsEmail>
+                <Validator.Submit onSubmit={() => {console.log('nice');}} value={'Submit'}/>
             </Validator>
         </div>
     );

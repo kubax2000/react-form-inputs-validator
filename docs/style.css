@@ -1,0 +1,39 @@
+body {
+    background: #0000000d;
+}
+header {
+    background: #00000087;
+    color: white;
+    margin-bottom: 400px;
+    padding: 15px 30px;
+    z-index: 10000;
+}
+header .links {
+    text-align: right;
+}
+header .title {
+    font-size: 30px;
+    font-weight: bold;
+}
+section {
+    position: absolute;
+    top: 450px;
+    width: 100%;
+}
+.container {
+    background: white;
+    border: 1px solid #c6c6c6;
+    border-radius: 5px;
+    padding: 10px 20px;
+}
+.img-checklist {
+    z-index: -1;
+}
+.main-text {
+    font-size: 22px;
+    font-weight: bold;
+    text-align: center;
+}
+.main-text a {
+    margin-top: 20px;
+}
