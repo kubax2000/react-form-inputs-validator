@@ -1,7 +1,7 @@
 const path = require('path');
 module.exports = {
     entry: {
-        index: './docs/index.jsx'
+        index: './docs/index.js'
     },
     module: {
         rules: [

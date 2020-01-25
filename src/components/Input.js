@@ -1,4 +1,4 @@
-import {callFunctions, joinClass} from '../heplers.jsx';
+import {callFunctions, joinClass} from '../heplers.js';
 import PropTypes from 'prop-types';
 import React from 'react';
 

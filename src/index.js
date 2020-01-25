@@ -1,17 +1,16 @@
-import Input from './components/Input.jsx';
-import IsAlphanumeric from './components/IsAlphanumeric.jsx';
-import IsEmail from './components/IsEmail.jsx';
-import IsLengthValid from './components/IsLengthValid.jsx';
-import IsNumber from './components/IsNumber.jsx';
-import IsRegexValid from './components/IsRegexValid.jsx';
-import IsRequired from './components/IsRequired.jsx';
-import IsValueValid from './components/IsValueValid.jsx';
+import Input from './components/Input.js';
+import IsAlphanumeric from './components/IsAlphanumeric.js';
+import IsEmail from './components/IsEmail.js';
+import IsLengthValid from './components/IsLengthValid.js';
+import IsNumber from './components/IsNumber.js';
+import IsRegexValid from './components/IsRegexValid.js';
+import IsRequired from './components/IsRequired.js';
+import IsValueValid from './components/IsValueValid.js';
 import PropTypes from 'prop-types';
 import React, {useState} from 'react';
-import Submit from './components/Submit.jsx';
+import Submit from './components/Submit.js';
 
-function Validator(props) {
-    const {children: Children, id: Id, includeForm: IncludeForm, ...otherProps} = props;
+function Index({as: As, children: Children, id: Id, includeForm: IncludeForm, ...otherProps}) {
     const [state, setState] = useState({
         validators: {}
     });
@@ -41,7 +40,7 @@ function Validator(props) {
     let elHelper = 0;
 
     const prepare = (el, index) => {
-        if(-1 !== ['function', 'object'].indexOf(typeof el.type) && -1 !== Object.keys(Validator).indexOf(el.type.name)) {
+        if(-1 !== ['function', 'object'].indexOf(typeof el.type) && -1 !== Object.keys(Index).indexOf(el.type.name)) {
             if("Input" === el.type.name && undefined === state.validators[Id].inputs[el.props.id]) {
                 state.validators[Id].inputs[el.props.id] = {changed: false, rules: [], value: ''};
             }
@@ -61,7 +60,7 @@ function Validator(props) {
         }
     };
     const render = (el, index) => {
-        if(-1 !== Object.keys(Validator).indexOf(el.type.name)) {
+        if(-1 !== Object.keys(Index).indexOf(el.type.name)) {
             if("Input" === el.type.name) {
                 return <el.type key={index}
                                 rfivOnChange={onInputChange}
@@ -100,26 +99,28 @@ function Validator(props) {
 
     React.Children.map(Children, prepare);
     const children = React.Children.map(Children, render);
-    return (
-        IncludeForm ? <form id={Id} {...otherProps}>{children}</form> : children
-    );
+    if(undefined !== As) {
+        return <As id={Id} {...otherProps}>{children}</As>;
+    }
+    return IncludeForm ? <form id={Id} {...otherProps}>{children}</form> : children;
 }
-Validator.propTypes = {
+Index.propTypes = {
+    as: PropTypes.elementType,
     id: PropTypes.string.isRequired,
     includeForm: PropTypes.bool
 };
-Validator.defaultProps = {
+Index.defaultProps = {
     includeForm: true
 };
 
-Validator.Input = Input;
-Validator.IsAlphanumeric = IsAlphanumeric;
-Validator.IsEmail = IsEmail;
-Validator.IsLengthValid = IsLengthValid;
-Validator.IsNumber = IsNumber;
-Validator.IsRegexValid = IsRegexValid;
-Validator.IsRequired = IsRequired;
-Validator.IsValueValid = IsValueValid;
-Validator.Submit = Submit;
+Index.Input = Input;
+Index.IsAlphanumeric = IsAlphanumeric;
+Index.IsEmail = IsEmail;
+Index.IsLengthValid = IsLengthValid;
+Index.IsNumber = IsNumber;
+Index.IsRegexValid = IsRegexValid;
+Index.IsRequired = IsRequired;
+Index.IsValueValid = IsValueValid;
+Index.Submit = Submit;
 
-export default Validator;
+export default Index;

@@ -3,8 +3,9 @@
   "bugs": {
     "url": "https://github.com/kubax2000/react-form-inputs-validator/issues"
   },
-  "description": "React library for form validation",
+  "description": "React library for easy form validation",
   "devDependencies": {
+    "@babel/cli": "^7.8.3",
     "@babel/core": "^7.7.5",
     "@babel/preset-env": "^7.7.6",
     "@babel/preset-react": "^7.7.4",
@@ -15,9 +16,12 @@
     "webpack": "^4.41.3",
     "webpack-cli": "^3.3.10"
   },
-  "directories": {
-    "lib": "lib"
-  },
+  "files": [
+    "LICENSE",
+    "README.md",
+    "index.jsx",
+    "build/"
+  ],
   "homepage": "https://github.com/kubax2000/react-form-inputs-validator#readme",
   "keywords": [
     "react",
@@ -31,16 +35,17 @@
     "react input validator"
   ],
   "license": "MIT",
-  "main": "index.js",
+  "main": "./build/index.js",
   "name": "react-form-inputs-validator",
-  "private": true,
   "repository": {
     "type": "git",
     "url": "git+https://github.com/kubax2000/react-form-inputs-validator.git"
   },
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
-    "watch": ".\\node_modules\\.bin\\webpack -d --config webpack.config.js -w"
+    "build": "./node_modules/.bin/babel src -d build",
+    "docs-build": "./node_modules/.bin/webpack -d --config webpack.config.js -p",
+    "docs-watch": "./node_modules/.bin/webpack -d --config webpack.config.js -w",
+    "prepublish": "npm run build && npm run docs-build"
   },
-  "version": "0.0.4"
+  "version": "0.0.12"
 }

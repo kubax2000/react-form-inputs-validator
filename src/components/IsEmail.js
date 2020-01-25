@@ -1,15 +1,15 @@
 import PropTypes from 'prop-types';
-import {RulesTable} from '../rules.jsx';
+import {RulesTable} from '../rules.js';
 import React from 'react';
 
-const IsNumber = ({children: Children, for: For, includeDiv: IncludeDiv, rfivShowErr: RfivShowErr, rule, value, visible: Visible, ...otherProps}) => {
+const IsEmail = ({children: Children, for: For, includeDiv: IncludeDiv, rfivShowErr: RfivShowErr, rule, value, visible: Visible, ...otherProps}) => {
     if(undefined !== Visible) {
         return Visible ? (IncludeDiv ? <div {...otherProps}>{Children}</div> : Children) : <></>;
     }
     return RfivShowErr ? (IncludeDiv ? <div {...otherProps}>{Children}</div> : Children) : <></>;
 };
 if (process.env.NODE_ENV !== "production") {
-    IsNumber.propTypes = {
+    IsEmail.propTypes = {
         className: PropTypes.string,
         for: PropTypes.string,
         includeDiv: PropTypes.bool,
@@ -18,9 +18,9 @@ if (process.env.NODE_ENV !== "production") {
         visible: PropTypes.bool
     };
 }
-IsNumber.defaultProps = {
+IsEmail.defaultProps = {
     className: 'rfiv-error',
     includeDiv: true,
-    rule: RulesTable.isNumber
+    rule: RulesTable.isEmail
 };
-export default IsNumber;
+export default IsEmail;

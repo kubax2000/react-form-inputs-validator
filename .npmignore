@@ -1,8 +1,0 @@
-.babelrc
-.gitignore
-.idea
-dist
-docs
-node_modules
-webpack.config.js
-webpack.config.private.js
