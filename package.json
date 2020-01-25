@@ -21,14 +21,19 @@
   "homepage": "https://github.com/kubax2000/react-form-inputs-validator#readme",
   "keywords": [
     "react",
-    "form",
-    "input",
     "validator",
-    "form-validation"
+    "react-validate",
+    "form validator",
+    "form validation",
+    "react validator",
+    "react form validator",
+    "input validator",
+    "react input validator"
   ],
   "license": "MIT",
   "main": "index.js",
   "name": "react-form-inputs-validator",
+  "private": true,
   "repository": {
     "type": "git",
     "url": "git+https://github.com/kubax2000/react-form-inputs-validator.git"
@@ -37,5 +42,5 @@
     "test": "echo \"Error: no test specified\" && exit 1",
     "watch": ".\\node_modules\\.bin\\webpack -d --config webpack.config.js -w"
   },
-  "version": "0.0.3"
+  "version": "0.0.4"
 }

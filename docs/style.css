@@ -4,9 +4,10 @@ body {
 header {
     background: #00000087;
     color: white;
-    margin-bottom: 400px;
     padding: 15px 30px;
+    position: absolute;
     z-index: 10000;
+    width: 100%;
 }
 header .links {
     text-align: right;
@@ -14,20 +15,30 @@ header .links {
 header .title {
     font-size: 30px;
     font-weight: bold;
+    padding-top: 5px;
+}
+input.rfiv-error {
+    border: 1px red solid;
+}
+input.rfiv-error:focus {
+    border: 1px red solid !important;
+    box-shadow: 0 0 0 0.2rem rgba(255, 0, 24, 0.25) !important;
 }
 section {
+    margin-bottom: 25px;
     position: absolute;
     top: 450px;
     width: 100%;
 }
+.code-header {
+    font-size: 20px;
+    font-weight: bold;
+    margin: 10px 0;
+}
 .container {
     background: white;
     border: 1px solid #c6c6c6;
-    border-radius: 5px;
     padding: 10px 20px;
-}
-.img-checklist {
-    z-index: -1;
 }
 .main-text {
     font-size: 22px;
