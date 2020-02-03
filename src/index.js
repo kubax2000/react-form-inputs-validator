@@ -60,7 +60,9 @@ function Index({as: As, children: Children, id: Id, includeForm: IncludeForm, ..
         }
     };
     const render = (el, index) => {
-        if(-1 !== Object.keys(Index).indexOf(el.type.name)) {
+        if('string' === typeof el) {
+            return el;
+        } else if(-1 !== Object.keys(Index).indexOf(el.type.name)) {
             if("Input" === el.type.name) {
                 return <el.type key={index}
                                 rfivOnChange={onInputChange}

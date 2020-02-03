@@ -47,5 +47,5 @@
     "docs-watch": "./node_modules/.bin/webpack -d --config webpack.config.js -w",
     "prepublish": "npm run build && npm run docs-build"
   },
-  "version": "0.0.14"
+  "version": "0.0.15"
 }

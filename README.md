@@ -30,11 +30,11 @@ function SignInForm() {
     return (
         <Validator id={'SignInForm'}>
             <Validator.Input id={'email'} type={'text'} />
-            <Validator.IsRequired for={'email'}>This field is required.</Validator.IsEmail>
+            <Validator.IsRequired for={'email'}>This field is required.</Validator.IsRequired>
             <Validator.IsEmail for={'email'}>This field must be email.</Validator.IsEmail>
             <Validator.Input id={'password'} type={'password'} />
-            <Validator.IsRequired for={'password'}>This field is required.</Validator.IsEmail>
-            <Validator.Submit onSubmit={handleSubmit}>Sign In</Validator.IsEmail>
+            <Validator.IsRequired for={'password'}>This field is required.</Validator.IsRequired>
+            <Validator.Submit onSubmit={handleSubmit}>Sign In</Validator.Submit>
         </Validator>
     );
 }
