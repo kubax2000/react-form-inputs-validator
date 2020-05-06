@@ -40,8 +40,11 @@ function Index({as: As, children: Children, id: Id, includeForm: IncludeForm, ..
     let elHelper = 0;
 
     const prepare = (el, index) => {
+        if(null == el) {
+            return;
+        }
         if(-1 !== ['function', 'object'].indexOf(typeof el.type) && -1 !== Object.keys(Index).indexOf(el.type.name)) {
-            if("Input" === el.type.name && undefined === state.validators[Id].inputs[el.props.id]) {
+            if(Input.prototype === el.type.prototype && undefined === state.validators[Id].inputs[el.props.id]) {
                 state.validators[Id].inputs[el.props.id] = {changed: false, rules: [], value: ''};
             }
             if(undefined !== el.props.rule) {
@@ -60,17 +63,17 @@ function Index({as: As, children: Children, id: Id, includeForm: IncludeForm, ..
         }
     };
     const render = (el, index) => {
-        if('string' === typeof el) {
+        if(null == el || 'string' === typeof el) {
             return el;
         } else if(-1 !== Object.keys(Index).indexOf(el.type.name)) {
-            if("Input" === el.type.name) {
+            if(Input.prototype === el.type.prototype) {
                 return <el.type key={index}
                                 rfivOnChange={onInputChange}
                                 rfivShowErr={-1 !== Object.values(state.validators[Id].inputs[el.props.id].rules).indexOf(false) && state.validators[Id].inputs[el.props.id].changed}
                                 {...el.props}>
                     {el.props.children}
                 </el.type>;
-            } else if("Submit" === el.type.name) {
+            } else if(Submit.prototype === el.type.prototype) {
                 return <el.type key={index}
                                 rfivFormResult={-1 === state.validators[Id].results.indexOf(false)}
                                 rfivOnClick={onSubmitClick}

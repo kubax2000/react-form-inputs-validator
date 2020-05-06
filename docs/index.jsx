@@ -1,6 +1,6 @@
 import React, {useState} from 'react';
 import ReactDOM from 'react-dom';
-import Validator from "../src/index.jsx";
+import Validator from '../src/index.js';
 
 export function ExampleComponent() {
     const [state, setState] = useState({
