@@ -57,15 +57,19 @@ function Index({as: As, children: Children, id: Id, includeForm: IncludeForm, ..
                 }
             }
         } else if(undefined !== el.props && undefined !== el.props.children) {
-            for(let i = 0; i < el.props.children.length; i++) {
-                prepare(el.props.children[i], index);
+            if(undefined !== el.props.children.length) {
+                for (let i = 0; i < el.props.children.length; i++) {
+                    prepare(el.props.children[i], index);
+                }
+            } else {
+                prepare(el.props.children, index);
             }
         }
     };
     const render = (el, index) => {
         if(null == el || 'string' === typeof el) {
             return el;
-        } else if(-1 !== Object.keys(Index).indexOf(el.type.name)) {
+        } else if(1 < Object.values(Index).map(a => a.prototype).indexOf(el.type.prototype)) {
             if(Input.prototype === el.type.prototype) {
                 return <el.type key={index}
                                 rfivOnChange={onInputChange}
