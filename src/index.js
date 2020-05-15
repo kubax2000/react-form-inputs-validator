@@ -90,20 +90,26 @@ function Index({as: As, children: Children, id: Id, includeForm: IncludeForm, ..
                             {...el.props}>
                 {el.props.children}
             </el.type>;
-        } else if(undefined !== el.props && undefined !== el.props.children) {
+        } else if(undefined !== el.props || undefined !== el.props.children) {
             if('string' === typeof el.props.children) {
-                return el.props.children;
+                return undefined !== el.props ? <el.type {...el.props}>{el.props.children}</el.type> : <el.type>{el.props.children}</el.type>;
             } else if(undefined !== el.props.children.length) {
                 let output = [];
                 for (let i = 0; i < el.props.children.length; i++) {
                     output.push(render(el.props.children[i], index + '-' + i));
                 }
-                return <el.type key={index}{...el.props}>{output}</el.type>;
+                return undefined !== el.props ? <el.type key={index} {...el.props}>{output}</el.type> : <el.type key={index}>{output}</el.type>;
+            } else if(undefined !== el.props.children) {
+                return undefined !== el.props ? <el.type key={index} {...el.props}>
+                    {render(el.props.children, index + '-' + 0)}
+                </el.type> : <el.type key={index}>
+                    {render(el.props.children, index + '-' + 0)}
+                </el.type>;
             } else {
-                return <el.type key={index}{...el.props}>{render(el.props.children, index + '-' + 0)}</el.type>;
+                return undefined !== el.props ? <el.type key={index} {...el.props}>{output}</el.type> : <el.type key={index}>{output}</el.type>;
             }
         }
-        return <React.Fragment key={index}>{el}</React.Fragment>;
+        return <el.type/>;
     };
 
     React.Children.map(Children, prepare);
