@@ -1,141 +1,414 @@
-import Input from './components/Input.js';
-import IsAlphanumeric from './components/IsAlphanumeric.js';
-import IsEmail from './components/IsEmail.js';
-import IsLengthValid from './components/IsLengthValid.js';
-import IsNumber from './components/IsNumber.js';
-import IsRegexValid from './components/IsRegexValid.js';
-import IsRequired from './components/IsRequired.js';
-import IsValueValid from './components/IsValueValid.js';
-import PropTypes from 'prop-types';
-import React, {useState} from 'react';
-import Submit from './components/Submit.js';
+import moment from "moment";
+import React, { useEffect, useMemo, useState } from "react";
+import { rules } from "./rules.js";
 
-function Index({as: As, children: Children, id: Id, includeForm: IncludeForm, ...otherProps}) {
-    const [state, setState] = useState({
-        validators: {}
+export default function useValidator(InitialValues, DefaultTab) {
+    const [state, setState] = useState(() => {
+        if (undefined !== DefaultTab) {
+            let initState = { errors: {}, info: {}, inputs: {} };
+            for (let tabKey in InitialValues) {
+                const inputs = InitialValues[tabKey];
+                for (let name in inputs) {
+                    initState.errors[name] = {};
+                    initState.info[name] = { active: false, interacted: false, tab: tabKey };
+                    initState.inputs[name] = inputs[name];
+                }
+            }
+            return initState;
+        }
+        let initState = { errors: {}, info: {}, inputs: { ...InitialValues } };
+        for (let key in InitialValues) {
+            initState.errors[key] = {};
+            initState.info[key] = { active: false, interacted: false };
+        }
+        return initState;
     });
+    const [tab, setTab] = useState(DefaultTab);
 
-    if(undefined === state.validators[Id]) {
-        state.validators[Id] = {
-            inputs: [],
-            results: []
+    const gerFirstInputError = () => {
+        for (let inputKey in state.errors) {
+            for (let ruleKey in state.errors[inputKey]) {
+                if (state.errors[inputKey][ruleKey]) {
+                    return inputKey;
+                }
+            }
+        }
+        return undefined;
+    };
+
+    const handleCheckboxChange = (name, onChange) => {
+        return (event, ...props) => {
+            setState((oldState) => {
+                oldState.info[name].interacted = true;
+                oldState.inputs[name] = !oldState.inputs[name];
+                return { ...oldState };
+            });
+            if (undefined !== onChange) {
+                onChange(event, ...props);
+            }
         };
-    } else {
-        state.validators[Id].results = [];
-    }
-
-    const onInputChange = (event) => {
-        state.validators[Id].inputs[event.target.id].changed = true;
-        state.validators[Id].inputs[event.target.id].value = event.target.value;
-        setState(Object.assign({}, state));
     };
-    const onSubmitClick = (event) => {
-        event.preventDefault();
-        for(let inputKey in state.validators[Id].inputs) {
-            state.validators[Id].inputs[inputKey].changed = true;
-        }
-        setState(Object.assign({}, state));
-    };
-
-    let elHelper = 0;
-
-    const prepare = (el, index) => {
-        if(null == el) {
-            return;
-        }
-        if(-1 !== ['function', 'object'].indexOf(typeof el.type) && -1 !== Object.keys(Index).indexOf(el.type.name)) {
-            if(Input.prototype === el.type.prototype && undefined === state.validators[Id].inputs[el.props.id]) {
-                state.validators[Id].inputs[el.props.id] = {changed: false, rules: [], value: ''};
+    const handleDatePickerChange = (name, onChange, dateFormat, timeFormat) => {
+        return (value, ...props) => {
+            let newValue = value;
+            if ("object" === typeof value && undefined === value._f) {
+                newValue._f = "";
+                if ("string" === typeof dateFormat) {
+                    newValue._f += dateFormat;
+                } else if (undefined === dateFormat || true === dateFormat) {
+                    newValue._f += moment.localeData().longDateFormat("L");
+                }
+                if ("string" === typeof timeFormat) {
+                    newValue._f += (0 < newValue._f.length ? " " : "") + timeFormat;
+                } else if (undefined === timeFormat || true === timeFormat) {
+                    newValue._f +=
+                        (0 < newValue._f.length ? " " : "") + moment.localeData().longDateFormat("LT");
+                }
             }
-            if(undefined !== el.props.rule) {
-                if(undefined !== el.props.for) {
-                    let result = el.props.rule(state.validators[Id].inputs[el.props.for].value, el.props);
-                    state.validators[Id].inputs[el.props.for].rules[el.type.name] = result;
-                    state.validators[Id].results.push(result);
+            setState((oldState) => {
+                oldState.info[name].interacted = true;
+                oldState.inputs[name] = newValue || null;
+                return { ...oldState };
+            });
+            if (undefined !== onChange) {
+                onChange(newValue, ...props);
+            }
+        };
+    };
+    const handleInputBlur = (name, onBlur) => {
+        return (...props) => {
+            setState((oldState) => {
+                oldState.info[name].active = false;
+                return { ...oldState };
+            });
+            if (undefined !== onBlur) {
+                onBlur(...props);
+            }
+        };
+    };
+    const handleInputChange = (name, onChange) => {
+        return (event, ...props) => {
+            const newValue = (props[0] && props[0].value) ?? event.currentTarget.value;
+            setState((oldState) => {
+                oldState.inputs[name] = newValue;
+                return { ...oldState };
+            });
+            if (undefined !== onChange) {
+                onChange(event, ...props);
+            }
+        };
+    };
+    const handleInputFocus = (name, onFocus) => {
+        return (...props) => {
+            setState((oldState) => {
+                oldState.info[name].active = true;
+                oldState.info[name].interacted = true;
+                return { ...oldState };
+            });
+            if (undefined !== onFocus) {
+                onFocus(...props);
+            }
+        };
+    };
+    const handleRadioChange = (name, value, onChange) => {
+        return (event, ...props) => {
+            setState((oldState) => {
+                oldState.info[name].interacted = true;
+                oldState.inputs[name] = value;
+                return { ...oldState };
+            });
+            if (undefined !== onChange) {
+                onChange(event, ...props);
+            }
+        };
+    };
+    const handleSubmit = (onSuccess, onError) => {
+        return (...props) => {
+            const errorInputKey = gerFirstInputError();
+            if (undefined !== errorInputKey) {
+                if ("function" === typeof onError) {
+                    onError(...props);
+                }
+                setState((oldState) => {
+                    for (let inputKey in oldState.info) {
+                        oldState.info[inputKey].interacted = true;
+                    }
+                    return { ...oldState };
+                });
+                if (undefined !== DefaultTab) {
+                    setTab(state.info[errorInputKey].tab);
+                }
+            } else {
+                if ("function" === typeof onSuccess) {
+                    onSuccess(...props);
+                }
+            }
+        };
+    };
+
+    const importCheckbox = (Name, { onChange: OnChange } = {}) => {
+        return {
+            checked: state.inputs[Name],
+            name: Name.toLowerCase(),
+            onChange: handleCheckboxChange(Name, OnChange),
+        };
+    };
+    const importDatePicker = (
+        Name,
+        {
+            dateFormat: DateFormat,
+            onBlur: OnBlur,
+            onChange: OnChange,
+            onFocus: OnFocus,
+            timeFormat: TimeFormat,
+        } = {}
+    ) => {
+        return {
+            dateFormat: DateFormat,
+            name: Name.toLowerCase(),
+            onBlur: handleInputBlur(Name, OnBlur),
+            onChange: handleDatePickerChange(Name, OnChange, DateFormat, TimeFormat),
+            onFocus: handleInputFocus(Name, OnFocus),
+            timeFormat: TimeFormat,
+            value: state.inputs[Name],
+        };
+    };
+    const importRadio = (Name, Value, { onChange: onChange } = {}) => {
+        return {
+            checked: Value === state.inputs[Name],
+            name: Name.toLowerCase(),
+            onChange: handleRadioChange(Name, Value, onChange),
+        };
+    };
+    const importInput = (Name, { onBlur: OnBlur, onChange: OnChange, onFocus: OnFocus } = {}) => {
+        return {
+            name: Name.toLowerCase(),
+            onBlur: handleInputBlur(Name, OnBlur),
+            onChange: handleInputChange(Name, OnChange),
+            onFocus: handleInputFocus(Name, OnFocus),
+            value: state.inputs[Name],
+        };
+    };
+    const importSubmit = ({ onError: OnError, onSuccess: OnSuccess }) => {
+        return {
+            onClick: handleSubmit(OnSuccess, OnError),
+        };
+    };
+
+    const setInputs = (callback) => {
+        setState((oldState) => {
+            return { ...oldState, inputs: callback(oldState.inputs) };
+        });
+    };
+
+    const IsEmail = ({ children: Children, enabled: Enabled = true, for: For }) => {
+        useEffect(() => {
+            setState((oldState) => {
+                const value = state.inputs[For];
+                const hasError = Enabled && !rules.isEmail(value);
+                const wasError = undefined !== oldState.errors[For].IsEmail;
+                if (hasError === wasError) {
+                    return oldState;
+                }
+                if (hasError) {
+                    oldState.errors[For].IsEmail = true;
                 } else {
-                    state.validators[Id].results.push(el.props.rule(el.props.value, el.props));
+                    delete oldState.errors[For].IsEmail;
                 }
-            }
-        } else if(undefined !== el.props && undefined !== el.props.children) {
-            if(undefined !== el.props.children.length) {
-                for (let i = 0; i < el.props.children.length; i++) {
-                    prepare(el.props.children[i], index);
-                }
-            } else {
-                prepare(el.props.children, index);
-            }
+                return { ...oldState };
+            });
+        }, [Enabled, state.inputs[For]]);
+
+        if (state.errors[For].IsEmail && !state.info[For].active && state.info[For].interacted) {
+            return <>{Children}</>;
         }
+        return <></>;
     };
-    const render = (el, index) => {
-        if(null == el || 'string' === typeof el) {
-            return el;
-        } else if(1 < Object.values(Index).map(a => a.prototype).indexOf(el.type.prototype)) {
-            if(Input.prototype === el.type.prototype) {
-                return <el.type key={index}
-                                rfivOnChange={onInputChange}
-                                rfivShowErr={-1 !== Object.values(state.validators[Id].inputs[el.props.id].rules).indexOf(false) && state.validators[Id].inputs[el.props.id].changed}
-                                {...el.props}>
-                    {el.props.children}
-                </el.type>;
-            } else if(Submit.prototype === el.type.prototype) {
-                return <el.type key={index}
-                                rfivFormResult={-1 === state.validators[Id].results.indexOf(false)}
-                                rfivOnClick={onSubmitClick}
-                                {...el.props}>
-                    {el.props.children}
-                </el.type>;
-            }
-            return <el.type key={index}
-                            rfivShowErr={!state.validators[Id].results[elHelper++] && (undefined === el.props.for || state.validators[Id].inputs[el.props.for].changed)}
-                            {...el.props}>
-                {el.props.children}
-            </el.type>;
-        } else if(undefined !== el.props || undefined !== el.props.children) {
-            if('string' === typeof el.props.children) {
-                return undefined !== el.props ? <el.type {...el.props}>{el.props.children}</el.type> : <el.type>{el.props.children}</el.type>;
-            } else if(undefined !== el.props.children.length) {
-                let output = [];
-                for (let i = 0; i < el.props.children.length; i++) {
-                    output.push(render(el.props.children[i], index + '-' + i));
+    const IsEqual = ({ children: Children, enabled: Enabled = true, for: For, value: Value }) => {
+        useEffect(() => {
+            setState((oldState) => {
+                const value = state.inputs[For];
+                const hasError = Enabled && !rules.isEqual(value, Value);
+                const wasError = undefined !== oldState.errors[For].IsEqual;
+                if (hasError === wasError) {
+                    return oldState;
                 }
-                return undefined !== el.props ? <el.type key={index} {...el.props}>{output}</el.type> : <el.type key={index}>{output}</el.type>;
-            } else if(undefined !== el.props.children) {
-                return undefined !== el.props ? <el.type key={index} {...el.props}>
-                    {render(el.props.children, index + '-' + 0)}
-                </el.type> : <el.type key={index}>
-                    {render(el.props.children, index + '-' + 0)}
-                </el.type>;
-            } else {
-                return undefined !== el.props ? <el.type key={index} {...el.props}>{output}</el.type> : <el.type key={index}>{output}</el.type>;
-            }
+                if (hasError) {
+                    oldState.errors[For].IsEqual = true;
+                } else {
+                    delete oldState.errors[For].IsEqual;
+                }
+                return { ...oldState };
+            });
+        }, [Enabled, state.inputs[For]]);
+
+        if (state.errors[For].IsEqual && !state.info[For].active && state.info[For].interacted) {
+            return <>{Children}</>;
         }
-        return <el.type/>;
+        return <></>;
+    };
+    const IsInRange = ({ children: Children, enabled: Enabled = true, for: For, range: [min, max] }) => {
+        useEffect(() => {
+            setState((oldState) => {
+                const value = state.inputs[For];
+                const hasError = Enabled && !rules.isInRange(value, [min, max]);
+                const wasError = undefined !== oldState.errors[For].IsInRange;
+                if (hasError === wasError) {
+                    return oldState;
+                }
+                if (hasError) {
+                    oldState.errors[For].IsInRange = true;
+                } else {
+                    delete oldState.errors[For].IsInRange;
+                }
+                return { ...oldState };
+            });
+        }, [Enabled, state.inputs[For]]);
+
+        if (state.errors[For].IsInRange && !state.info[For].active && state.info[For].interacted) {
+            return <>{Children}</>;
+        }
+        return <></>;
+    };
+    const IsLengthValid = ({ children: Children, enabled: Enabled = true, for: For, length: [min, max] }) => {
+        useEffect(() => {
+            setState((oldState) => {
+                const value = state.inputs[For];
+                const hasError = Enabled && !rules.isLengthValid(value, [min, max]);
+                const wasError = undefined !== oldState.errors[For].IsLengthValid;
+                if (hasError === wasError) {
+                    return oldState;
+                }
+                if (hasError) {
+                    oldState.errors[For].IsLengthValid = true;
+                } else {
+                    delete oldState.errors[For].IsLengthValid;
+                }
+                return { ...oldState };
+            });
+        }, [Enabled, state.inputs[For]]);
+
+        if (state.errors[For].IsLengthValid && !state.info[For].active && state.info[For].interacted) {
+            return <>{Children}</>;
+        }
+        return <></>;
+    };
+    const IsMomentValid = ({ children: Children, enabled: Enabled = true, for: For }) => {
+        useEffect(() => {
+            setState((oldState) => {
+                const value = state.inputs[For];
+                const hasError = Enabled && !rules.isMomentValid(value);
+                const wasError = undefined !== oldState.errors[For].IsMomentValid;
+                if (hasError === wasError) {
+                    return oldState;
+                }
+                if (hasError) {
+                    oldState.errors[For].IsMomentValid = true;
+                } else {
+                    delete oldState.errors[For].IsMomentValid;
+                }
+                return { ...oldState };
+            });
+        }, [Enabled, state.inputs[For]]);
+
+        if (state.errors[For].IsMomentValid && !state.info[For].active && state.info[For].interacted) {
+            return <>{Children}</>;
+        }
+        return <></>;
+    };
+    const IsNumber = ({ children: Children, enabled: Enabled = true, for: For }) => {
+        useEffect(() => {
+            setState((oldState) => {
+                const value = state.inputs[For];
+                const hasError = Enabled && !rules.isNumber(value);
+                const wasError = undefined !== oldState.errors[For].IsNumber;
+                if (hasError === wasError) {
+                    return oldState;
+                }
+                if (hasError) {
+                    oldState.errors[For].IsNumber = true;
+                } else {
+                    delete oldState.errors[For].IsNumber;
+                }
+                return { ...oldState };
+            });
+        }, [Enabled, state.inputs[For]]);
+
+        if (state.errors[For].IsNumber && !state.info[For].active && state.info[For].interacted) {
+            return <>{Children}</>;
+        }
+        return <></>;
+    };
+    const IsValid = ({ children: Children, enabled: Enabled = true, for: For, pattern: Pattern }) => {
+        useEffect(() => {
+            setState((oldState) => {
+                const value = state.inputs[For];
+                const hasError = Enabled && !rules.isValid(value, Pattern);
+                const wasError = undefined !== oldState.errors[For].IsValid;
+                if (hasError === wasError) {
+                    return oldState;
+                }
+                if (hasError) {
+                    oldState.errors[For].IsValid = true;
+                } else {
+                    delete oldState.errors[For].IsValid;
+                }
+                return { ...oldState };
+            });
+        }, [Enabled, state.inputs[For]]);
+
+        if (state.errors[For].IsValid && !state.info[For].active && state.info[For].interacted) {
+            return <>{Children}</>;
+        }
+        return <></>;
+    };
+    const Required = ({ children: Children, enabled: Enabled = true, for: For }) => {
+        useEffect(() => {
+            setState((oldState) => {
+                const value = state.inputs[For];
+                const hasError = Enabled && !rules.required(value);
+                const wasError = undefined !== oldState.errors[For].Required;
+                if (hasError === wasError) {
+                    return oldState;
+                }
+                if (hasError) {
+                    oldState.errors[For].Required = true;
+                } else {
+                    delete oldState.errors[For].Required;
+                }
+                return { ...oldState };
+            });
+        }, [Enabled, state.inputs[For]]);
+
+        if (state.errors[For].Required && !state.info[For].active && state.info[For].interacted) {
+            return <>{Children}</>;
+        }
+        return <></>;
     };
 
-    React.Children.map(Children, prepare);
-    const children = React.Children.map(Children, render);
-    if(undefined !== As) {
-        return <As id={Id} {...otherProps}>{children}</As>;
-    }
-    return IncludeForm ? <form id={Id} {...otherProps}>{children}</form> : children;
+    const Validator = useMemo(() => {
+        return {
+            importCheckbox,
+            importDatePicker,
+            importInput,
+            importRadio,
+            importSubmit,
+            IsEmail,
+            IsEqual,
+            IsInRange,
+            IsLengthValid,
+            IsMomentValid,
+            IsNumber,
+            IsValid,
+            Required,
+        };
+    }, []);
+
+    return {
+        inputs: state.inputs,
+        tab,
+        setInputs,
+        setTab,
+        Validator: Validator,
+    };
 }
-Index.propTypes = {
-    as: PropTypes.elementType,
-    id: PropTypes.string.isRequired,
-    includeForm: PropTypes.bool
-};
-Index.defaultProps = {
-    includeForm: true
-};
-
-Index.Input = Input;
-Index.IsAlphanumeric = IsAlphanumeric;
-Index.IsEmail = IsEmail;
-Index.IsLengthValid = IsLengthValid;
-Index.IsNumber = IsNumber;
-Index.IsRegexValid = IsRegexValid;
-Index.IsRequired = IsRequired;
-Index.IsValueValid = IsValueValid;
-Index.Submit = Submit;
-
-export default Index;

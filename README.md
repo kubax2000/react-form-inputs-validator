@@ -19,23 +19,31 @@ npm install react-form-inputs-validator --save-dev
 
 ```jsx
 import React from 'react';
-import Validator from 'react-form-inputs-validator';
+import useValidator from 'react-form-inputs-validator';
 
 function SignInForm() {
-    const handleSubmit = (event) => {
-        event.preventDefault();
-        alert('Success');
+    const { inputs, Validator } = useValidator({
+        Email: "",
+        Password: "",
+    });
+
+    const handleFormSubmit = () => {
+        alert(JSON.stringify(inputs));
     };
 
     return (
-        <Validator id={'SignInForm'}>
-            <Validator.Input id={'email'} type={'text'} />
-            <Validator.IsRequired for={'email'}>This field is required.</Validator.IsRequired>
-            <Validator.IsEmail for={'email'}>This field must be email.</Validator.IsEmail>
-            <Validator.Input id={'password'} type={'password'} />
-            <Validator.IsRequired for={'password'}>This field is required.</Validator.IsRequired>
-            <Validator.Submit onSubmit={handleSubmit}>Sign In</Validator.Submit>
-        </Validator>
+        <div>
+            <input {...Validator.importInput("Email")} />
+            <Validator.Required for="Email">This field is required.</Validator.Required>
+            <Validator.IsEmail for="Email">This field must be email.</Validator.IsEmail>
+            <input {...Validator.importInput("Password")} />
+            <Validator.Required for="Password">This field is required.</Validator.Required>
+            <input
+                type="submit"
+                value="Sign In"
+                {...Validator.importSubmit({ onSuccess: handleFormSubmit })}
+            />
+        </div>
     );
 }
 export default SignInForm;

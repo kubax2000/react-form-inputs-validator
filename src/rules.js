@@ -1,23 +1,38 @@
-export const RulesTable = {
-    isAlphanumeric: (value) => {
-        return undefined === value || '' === value || /^[A-Za-z0-9]+$/.test(String(value).toLowerCase());
-    },
+export const rules = {
     isEmail: (value) => {
-        return undefined === value || '' === value || /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/.test(String(value).toLowerCase());
+        return (
+            undefined === value ||
+            0 === value.length ||
+            /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/.test(
+                String(value).toLowerCase()
+            )
+        );
     },
-    isLengthValid: (value, props) => {
-        return undefined === value || '' === value || ((undefined === props.minLength || value.length >= props.minLength) && (undefined === props.maxLength || value.length <= props.maxLength));
+    isEqual: (value, target) => {
+        return undefined === value || 0 === value.length || target === value;
+    },
+    isInRange: (value, [min, max]) => {
+        return undefined === value || 0 === value.length || (value >= min && value <= max);
+    },
+    isLengthValid: (value, [min, max]) => {
+        return undefined === value || 0 === value.length || (min <= value.length && max >= value.length);
+    },
+    isMomentValid: (value) => {
+        return (
+            undefined === value ||
+            null === value ||
+            0 === value.length ||
+            (undefined !== value.isValid && value.isValid())
+        );
     },
     isNumber: (value) => {
-        return !Number.isNaN(Number(value));
+        return undefined === value || 0 === value.length || !Number.isNaN(Number(value));
     },
-    isRegexValid: (value, props) => {
-        return undefined === value || '' === value || props.regex.test(String(value));
+    isValid: (value, pattern) => {
+        const regex = new RegExp(pattern);
+        return regex.test(value);
     },
-    isRequired: (value) => {
-        return undefined !== value && value.length !== 0 && value !== false;
+    required: (value) => {
+        return undefined !== value && null !== value && false !== value && 0 !== value.length;
     },
-    isValueValid: (value, props) => {
-        return undefined === value || '' === value || ((undefined === props.min || value >= props.min) && (undefined === props.max || value <= props.max));
-    }
 };
