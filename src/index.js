@@ -146,6 +146,13 @@ export default function useValidator(InitialValues, DefaultTab) {
         };
     };
 
+    const hasError = (name) => {
+        return undefined !== state.errors[name] && 0 !== Object.values(state.errors[name]).length;
+    };
+    const hasVisibleError = (name) => {
+        return hasError(name) && !state.info[name].active && state.info[name].interacted;
+    };
+
     const importCheckbox = (Name, { onChange: OnChange } = {}) => {
         return {
             checked: state.inputs[Name],
@@ -388,6 +395,8 @@ export default function useValidator(InitialValues, DefaultTab) {
 
     const Validator = useMemo(() => {
         return {
+            hasError,
+            hasVisibleError,
             importCheckbox,
             importDatePicker,
             importInput,
